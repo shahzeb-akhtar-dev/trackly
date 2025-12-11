@@ -7,7 +7,7 @@ Every new page / feature should follow this structure so that code is:
 
 - **Consistent** across the project  
 - **Typed** via shared interfaces in `app/types`  
-- **Composable-first** in `app/composables`  
+- **Composable** in `app/composables`  
 - **Visually consistent** via Tailwind + Nuxt UI + **CSS m    ** in `app/assets/css/variables.css`
 
 ---
@@ -15,7 +15,7 @@ Every new page / feature should follow this structure so that code is:
 ### ✅ Folder conventions
 
 - **`app/pages`**:  
-  Route-driven pages (e.g. `auth/login.vue`, `dashboard/index.vue`).
+  Route-driven pages (e.g. `auth/login.vue`, `dashboard.vue`).
 
 - **`app/layouts`**:  
   Shared layouts (`default.vue`, `blank.vue`, etc.).
@@ -37,14 +37,14 @@ Every new page / feature should follow this structure so that code is:
   Must **import** the design‑token file:
   `@import './,.css';`
 
-- **`app/assets/css/variables.css`**:  
+- **`app/assets/css/main.css`**:  
   Global **CSS variables** (design tokens) used throughout the app.
 
 ---
 
 ### ✅ CSS variables pattern (design tokens)
 
-- **File**: `app/assets/css/variables.css`
+- **File**: `app/assets/css/main.css`
 - **Purpose**: central place for colors, typography, radii, shadows, spacings.
 - **Usage**:
   - Use variables in Tailwind via `rgb(var(--color-primary))` patterns where needed.
@@ -78,11 +78,11 @@ For every major page or feature, create a section using this pattern:
    - Example: “Sign in users to Trackly with email/password or Google in a split layout.”
 
 2. **Related files**
-   - `pages/...`
-   - `components/...`
-   - `composables/...`
-   - `types/...`
-   - `utils/...` (if any)
+   - `app/pages/...`
+   - `app/components/...`
+   - `app/composables/...`
+   - `app/types/...`
+   - `app/utils/...` (if any)
 
 3. **Types (in `app/types`)**
    - Define interfaces first (e.g. `AuthForm`, `Project`, `SidebarItem`).
