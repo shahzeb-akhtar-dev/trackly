@@ -1,9 +1,13 @@
 <template>
-  <NuxtLayout>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
     <NuxtPage />
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
-// Blank layout (no header/footer/sidebar)
+// Auth layout - minimal, no header/sidebar
 </script>
+
+<style scoped>
+/* Auth layout styles */
+</style>
