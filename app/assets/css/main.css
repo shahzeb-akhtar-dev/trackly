@@ -41,12 +41,48 @@
   --ui-warning: rgb(var(--ui-color-warning-500));
   --ui-error: rgb(var(--ui-color-error-500));
 
+  /* NEUTRAL SCALE - Extended for backgrounds & overlays */
+  --color-slate-50: rgb(248 250 252);
+  --color-slate-100: rgb(241 245 249);
+  --color-slate-200: rgb(226 232 240);
+  --color-slate-300: rgb(203 213 225);
+  --color-slate-400: rgb(148 163 184);
+  --color-slate-500: rgb(100 116 139);
+  --color-slate-600: rgb(71 85 105);
+  --color-slate-700: rgb(51 65 85);
+  --color-slate-800: rgb(30 41 59);
+  --color-slate-900: rgb(15 23 42);
+
+  /* SEMANTIC - Status & Health */
+  --color-success-light: rgb(220 252 231);
+  --color-success-dark: rgb(5 150 105);
+  --color-warning-light: rgb(254 243 199);
+  --color-warning-dark: rgb(180 83 9);
+  --color-error-light: rgb(254 226 226);
+  --color-error-dark: rgb(200 30 60);
+
   /* LAYOUT */
+  --layout-sidebar-width: 16rem;
+  --layout-header-height: 64px;
+  --layout-content-max-width: 1400px;
+
+  /* RADIUS */
+  --radius-sm: 8px;
+  --radius-md: 12px;
   --radius-lg: 20px;
   --radius-full: 9999px;
 
+  /* SHADOWS */
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 2px 4px rgb(0 0 0 / 0.08);
   --shadow-soft: 0 6px 20px rgb(13 92 208 / 0.25);
+  --shadow-medium: 0 8px 24px rgb(0 0 0 / 0.12);
   --shadow-strong: 0 12px 32px rgb(9 60 160 / 0.35);
+
+  /* TRANSITIONS */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 
   --content-max-width: 1280px;
   --sidebar-width: 280px;

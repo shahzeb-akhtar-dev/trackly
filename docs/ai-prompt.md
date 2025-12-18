@@ -67,6 +67,72 @@ Recommended structure:
 
 ---
 
+### ✅ Strict Tailwind CSS Rule
+
+**All styling MUST use Tailwind CSS utilities. No custom CSS except for:**
+
+1. **CSS Variables** (design tokens in `app/assets/css/main.css`)
+   - Define design tokens ONLY in CSS variables
+   - Use variables via `rgb(var(--color-primary))` pattern in Tailwind
+
+2. **Scoped PostCSS** (`<style scoped lang="postcss">`)
+   - **ONLY for** animations (keyframes), complex responsive logic, or unavoidable edge cases
+   - Must still use CSS variables, never hardcode colors
+   - Use `@apply` directive to compose Tailwind classes when readability demands it
+   - Prefer Tailwind utilities in template over scoped styles
+
+3. **FORBIDDEN:**
+   - ❌ Hardcoded colors (`#0052cc`, `rgb(0, 82, 204)`)
+   - ❌ Hardcoded sizing units in CSS files (use Tailwind spacing scale)
+   - ❌ Inline `style=""` attributes (use Tailwind classes)
+   - ❌ Plain CSS without variables
+   - ❌ CSS-in-JS solutions other than scoped style blocks
+
+4. **Tailwind Usage:**
+   - ✅ Utility-first approach: `class="flex items-center gap-3 px-4 py-2 rounded-lg"`
+   - ✅ Responsive prefixes: `md:w-1/2 lg:px-8 sm:block`
+   - ✅ State variants: `hover:bg-primary focus:ring-2 active:scale-95`
+   - ✅ Dark mode: `dark:bg-slate-900 dark:text-white`
+   - ✅ Tailwind plugins (Nuxt UI components integrated)
+
+5. **CSS Variables with Tailwind:**
+   ```css
+   /* In main.css */
+   :root {
+     --color-primary: 0 82 204;  /* RGB values without rgb() */
+   }
+   
+   /* In template or scoped styles */
+   class="bg-[rgb(var(--color-primary))]"     /* Using arbitrary value */
+   color: rgb(var(--color-primary));          /* In scoped CSS */
+   ```
+
+**Example**: ✅ GOOD
+```vue
+<div class="flex flex-col gap-4 px-6 py-4 bg-surface rounded-lg border border-border-subtle">
+  <h2 class="text-lg font-semibold text-text-main">Title</h2>
+  <button class="px-4 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity">
+    Click me
+  </button>
+</div>
+```
+
+**Example**: ❌ BAD
+```vue
+<div style="display: flex; gap: 1rem; background-color: #ffffff;">
+  <h2 style="color: #112433; font-weight: 600;">Title</h2>
+</div>
+
+<style scoped>
+.custom-div {
+  background: linear-gradient(to right, #0052cc, #228bfc);
+  padding: 16px 24px;
+}
+</style>
+```
+
+---
+
 ### ✅ Per‑page / feature markdown pattern
 
 For every major page or feature, create a section using this pattern:
