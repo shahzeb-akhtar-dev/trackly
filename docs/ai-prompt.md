@@ -1,18 +1,19 @@
 ---
 
-### ✅ Global project pattern
+### ✅ Global Project Pattern
 
 This document defines the **standard AI prompt + documentation pattern** for the whole Trackly Nuxt app.
 Every new page / feature should follow this structure so that code is:
 
 - **Consistent** across the project  
 - **Typed** via shared interfaces in `app/types`  
-- **Composable** in `app/composables`  
-- **Visually consistent** via Tailwind + Nuxt UI + **CSS m    ** in `app/assets/css/variables.css`
+- **State managed** via Pinia stores in `app/stores` for shared data
+- **Composable** in `app/composables` for API calls and local logic
+- **Visually consistent** via **Tailwind CSS utilities** strictly
 
 ---
 
-### ✅ Folder conventions
+### ✅ Folder Conventions
 
 - **`app/pages`**:  
   Route-driven pages (e.g. `auth/login.vue`, `dashboard.vue`).
@@ -23,243 +24,324 @@ Every new page / feature should follow this structure so that code is:
 - **`app/components`**:  
   Reusable UI components (cards, tables, modals, etc.).
 
+- **`app/stores`**:  
+  Pinia stores for **global state shared across multiple components**.
+  - Use stores for: user auth state, layout/UI state, navigation, cached data
+  - Stores are auto-imported via `@pinia/nuxt`
+
 - **`app/composables`**:  
-  Reusable logic and data fetching (e.g. `useAuthLogin`, `useProjects`, `useTableFilters`).
+  Reusable logic for **API calls and component-local state**.
+  - Use composables for: API fetching, form handling, local UI logic
+  - NOT for global shared state (use stores instead)
 
 - **`app/types`**:  
-  All shared TypeScript interfaces and types (`auth.ts`, `project.ts`, `table.ts`, etc.).
+  All shared TypeScript interfaces and types (`auth.ts`, `layout.ts`, `project.ts`, etc.).
 
 - **`app/utils`**:  
   Small, pure helper functions (formatting, validators, mappers).
 
 - **`app/assets/css/main.css`**:  
-  Entry for Tailwind / Nuxt UI styles.  
-  Must **import** the design‑token file:
-  `@import './,.css';`
-
-- **`app/assets/css/main.css`**:  
-  Global **CSS variables** (design tokens) used throughout the app.
+  Entry for Tailwind styles and CSS variables (design tokens).
 
 ---
 
-### ✅ CSS variables pattern (design tokens)
+### ✅ Store vs Composable Decision Guide
 
-- **File**: `app/assets/css/main.css`
-- **Purpose**: central place for colors, typography, radii, shadows, spacings.
-- **Usage**:
-  - Use variables in Tailwind via `rgb(var(--color-primary))` patterns where needed.
-  - Use in plain CSS / PostCSS like: `color: rgb(var(--color-primary));`
+| Use Case | Use Store | Use Composable |
+|----------|-----------|----------------|
+| User authentication state | ✅ | ❌ |
+| Layout/sidebar/header state | ✅ | ❌ |
+| Navigation items & active state | ✅ | ❌ |
+| Cached data shared across pages | ✅ | ❌ |
+| API calls (fetch, create, update) | ❌ | ✅ |
+| Form state & validation | ❌ | ✅ |
+| Component-local UI state | ❌ | ✅ |
+| Data transformation logic | ❌ | ✅ |
 
-Recommended structure:
+**Rule of thumb:**
+- **Store**: Data that needs to persist or be accessed from multiple unrelated components
+- **Composable**: Logic that fetches/mutates data or is used within a single component tree
 
-- **Color tokens**
-  - `--color-primary`, `--color-primary-soft`, `--color-primary-strong`
-  - `--color-surface`, `--color-surface-alt`
-  - `--color-border-subtle`, `--color-border-strong`
-  - `--color-text-main`, `--color-text-muted`, `--color-text-on-primary`
+---
 
-- **Radius + shadow tokens**
-  - `--radius-lg`, `--radius-full`
-  - `--shadow-soft`, `--shadow-strong`
+### ✅ Store Structure Pattern
 
-- **Layout tokens**
-  - `--content-max-width`, `--sidebar-width`
+```
+app/stores/
+├── auth.ts          # User, token, permissions (persisted)
+├── layout.ts        # Sidebar, header, theme state (persisted)
+├── navigation.ts    # Nav items, active route
+├── projects.ts      # Cached projects data
+└── notifications.ts # Notification state
+```
+
+**Store Template:**
+
+```typescript
+// app/stores/example.ts
+import { defineStore } from 'pinia'
+
+interface ExampleState {
+  items: Item[]
+  loading: boolean
+}
+
+export const useExampleStore = defineStore('example', {
+  state: (): ExampleState => ({
+    items: [],
+    loading: false,
+  }),
+
+  getters: {
+    activeItems: (state) => state.items.filter(i => i.active),
+  },
+
+  actions: {
+    setItems(items: Item[]) {
+      this.items = items
+    },
+  },
+
+  // Optional: persist specific fields to localStorage
+  persist: {
+    pick: ['items'],
+  },
+})
+```
+
+---
+
+### ✅ Composable Pattern (for API calls)
+
+```typescript
+// app/composables/api/useProjects.ts
+export const useProjects = () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+
+  const fetchProjects = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await $fetch('/api/projects')
+      // Optionally update store with fetched data
+      const projectStore = useProjectStore()
+      projectStore.setProjects(data)
+      return data
+    } catch (e) {
+      error.value = 'Failed to fetch projects'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { loading, error, fetchProjects }
+}
+```
 
 ---
 
 ### ✅ Strict Tailwind CSS Rule
 
-**All styling MUST use Tailwind CSS utilities. No custom CSS except for:**
+**All styling MUST use Tailwind CSS utilities. No exceptions.**
 
-1. **CSS Variables** (design tokens in `app/assets/css/main.css`)
-   - Define design tokens ONLY in CSS variables
-   - Use variables via `rgb(var(--color-primary))` pattern in Tailwind
+#### ✅ ALLOWED:
 
-2. **Scoped PostCSS** (`<style scoped lang="postcss">`)
-   - **ONLY for** animations (keyframes), complex responsive logic, or unavoidable edge cases
-   - Must still use CSS variables, never hardcode colors
-   - Use `@apply` directive to compose Tailwind classes when readability demands it
-   - Prefer Tailwind utilities in template over scoped styles
-
-3. **FORBIDDEN:**
-   - ❌ Hardcoded colors (`#0052cc`, `rgb(0, 82, 204)`)
-   - ❌ Hardcoded sizing units in CSS files (use Tailwind spacing scale)
-   - ❌ Inline `style=""` attributes (use Tailwind classes)
-   - ❌ Plain CSS without variables
-   - ❌ CSS-in-JS solutions other than scoped style blocks
-
-4. **Tailwind Usage:**
-   - ✅ Utility-first approach: `class="flex items-center gap-3 px-4 py-2 rounded-lg"`
-   - ✅ Responsive prefixes: `md:w-1/2 lg:px-8 sm:block`
-   - ✅ State variants: `hover:bg-primary focus:ring-2 active:scale-95`
-   - ✅ Dark mode: `dark:bg-slate-900 dark:text-white`
-   - ✅ Tailwind plugins (Nuxt UI components integrated)
-
-5. **CSS Variables with Tailwind:**
-   ```css
-   /* In main.css */
-   :root {
-     --color-primary: 0 82 204;  /* RGB values without rgb() */
-   }
-   
-   /* In template or scoped styles */
-   class="bg-[rgb(var(--color-primary))]"     /* Using arbitrary value */
-   color: rgb(var(--color-primary));          /* In scoped CSS */
+1. **Tailwind utility classes in templates:**
+   ```vue
+   <div class="flex items-center gap-4 px-6 py-4 bg-white rounded-lg border border-gray-200">
+     <h2 class="text-lg font-semibold text-gray-900">Title</h2>
+     <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+       Click me
+     </button>
+   </div>
    ```
 
-**Example**: ✅ GOOD
-```vue
-<div class="flex flex-col gap-4 px-6 py-4 bg-surface rounded-lg border border-border-subtle">
-  <h2 class="text-lg font-semibold text-text-main">Title</h2>
-  <button class="px-4 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity">
-    Click me
-  </button>
-</div>
-```
+2. **Responsive prefixes:**
+   ```vue
+   <div class="w-full md:w-1/2 lg:w-1/3 p-4 lg:p-8">
+   ```
 
-**Example**: ❌ BAD
-```vue
-<div style="display: flex; gap: 1rem; background-color: #ffffff;">
-  <h2 style="color: #112433; font-weight: 600;">Title</h2>
-</div>
+3. **State variants:**
+   ```vue
+   <button class="bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 active:scale-95">
+   ```
 
+4. **Dark mode:**
+   ```vue
+   <div class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+   ```
+
+5. **CSS Variables (design tokens only) in `main.css`:**
+   ```css
+   :root {
+     --color-primary: 59 130 246;  /* RGB values */
+   }
+   ```
+
+6. **Arbitrary values when needed:**
+   ```vue
+   <div class="w-[calc(100%-2rem)] bg-[rgb(var(--color-primary))]">
+   ```
+
+#### ❌ FORBIDDEN:
+
+- ❌ Hardcoded colors: `style="color: #0052cc"`
+- ❌ Inline styles: `style="padding: 16px"`
+- ❌ `<style scoped>` blocks with custom CSS (except keyframes)
+- ❌ CSS-in-JS or external CSS files per component
+- ❌ `@apply` directive (use utility classes directly)
+
+#### Exception - Keyframe Animations Only:
+
+```vue
 <style scoped>
-.custom-div {
-  background: linear-gradient(to right, #0052cc, #228bfc);
-  padding: 16px 24px;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 </style>
 ```
 
 ---
 
-### ✅ Per‑page / feature markdown pattern
+### ✅ Icon Usage
 
-For every major page or feature, create a section using this pattern:
+Use `@nuxt/icon` with Iconify icons:
 
-`====== Page / Feature: <Name> ======`
+```vue
+<Icon name="heroicons:chart-bar" class="w-5 h-5 text-gray-600" />
+<Icon name="heroicons:user-solid" class="w-6 h-6" />
+<Icon name="lucide:settings" class="w-4 h-4" />
+```
 
-1. **Context / Goal**
-   - Short description of the UX goal and business context.
-   - Example: “Sign in users to Trackly with email/password or Google in a split layout.”
-
-2. **Related files**
-   - `app/pages/...`
-   - `app/components/...`
-   - `app/composables/...`
-   - `app/types/...`
-   - `app/utils/...` (if any)
-
-3. **Types (in `app/types`)**
-   - Define interfaces first (e.g. `AuthForm`, `Project`, `SidebarItem`).
-   - Mention the exact type name and file path.
-
-4. **Composable(s) (in `app/composables`)**
-   - Name of composable (e.g. `useAuthLogin`).
-   - What state, computed values, and methods it exposes.
-   - How errors and loading states are handled.
-
-5. **Template (in `pages` / `components`)**
-   - High-level description of the layout:
-     - Columns / sections
-     - Key UI elements (forms, buttons, tables, charts, etc.)
-   - Note where Tailwind utility classes and Nuxt UI components are used.
-   - Mention when CSS variables are used for consistent colors / spacing.
-
-6. **Script (`<script setup lang="ts">`)**
-   - Imports:
-     - Types from `~/types/...`
-     - Composables from `~/composables/...`
-     - Utility functions from `~/utils/...`
-   - Local state (e.g. `form`, `loading`, `error`).
-   - Lifecycle hooks and event handlers.
-
-7. **Styles (`<style scoped lang="postcss">`)**
-   - Page‑specific tweaks only.
-   - Use Tailwind’s `@apply` where it keeps things readable.
-   - Prefer **CSS variables** from `variables.css` over hard‑coded colors.
-
-8. **AI Prompt Notes**
-   - Paste the exact prompt used to generate / modify this page.
-   - Include date and quick changelog bullets.
+Common icon sets:
+- `heroicons:` - Heroicons (outline)
+- `heroicons:*-solid` - Heroicons (solid)
+- `lucide:` - Lucide icons
+- `mdi:` - Material Design Icons
 
 ---
 
-### ✅ Example sections to create
+### ✅ Component Template
 
-Use the above pattern to add sections in this file for:
+```vue
+<template>
+  <div class="flex flex-col gap-4 p-6 bg-white rounded-xl border border-gray-200">
+    <!-- Content with Tailwind classes only -->
+  </div>
+</template>
 
-- `====== Page / Feature: Auth / Login ======`
-- `====== Page / Feature: Auth / Signup ======`
-- `====== Page / Feature: Dashboard Overview ======`
-- `====== Page / Feature: Projects / List & Board View ======`
-- `====== Page / Feature: Tasks / Details Drawer ======`
-- `====== Page / Feature: Global Navigation & Sidebar ======`
-- `====== Page / Feature: Settings / Profile & Team ======`
+<script setup lang="ts">
+// 1. Imports
+import type { MyType } from '~/types/example'
+import { useMyStore } from '~/stores/example'
+import { useMyApi } from '~/composables/api/useMyApi'
 
-Each section should follow steps **1–8** above so that future AI usage is consistent and the UI stays aligned with the global CSS variables.
+// 2. Store & Composables
+const store = useMyStore()
+const { loading, fetchData } = useMyApi()
+
+// 3. Local state
+const localState = ref('')
+
+// 4. Computed
+const computed = computed(() => store.items.length)
+
+// 5. Methods
+const handleClick = () => {
+  // ...
+}
+
+// 6. Lifecycle
+onMounted(() => {
+  fetchData()
+})
+</script>
+
+<!-- NO <style> block unless absolutely necessary for keyframes -->
+```
+
+---
+
+### ✅ Per-Page / Feature Documentation Pattern
+
+For every major page or feature, create a section:
+
+`====== Page / Feature: <Name> ======`
+
+1. **Context / Goal** - UX goal and business context
+2. **Related files** - pages, components, stores, composables, types
+3. **Types** - Interface definitions
+4. **Store(s)** - What global state is used/modified
+5. **Composable(s)** - API calls and local logic
+6. **Template** - Layout description with Tailwind classes
+7. **Script** - Imports, state, methods overview
+8. **AI Prompt Notes** - Prompt used and changelog
 
 ---
 
 ====== Page / Feature: Auth / Login ======
 
 1. **Context / Goal**
-   - Split-screen login page with **brand gradient panel on the left** and a **carded form on the right**.
-   - Supports **email / username + password** login and **Google OAuth**, styled to match the Trackly marketing design.
+   - Split-screen login page with brand gradient panel and carded form.
+   - Supports email/password login and Google OAuth.
 
 2. **Related files**
-   - `pages/auth/login.vue` – main page.
-   - `composables/auth/useAuthLogin.ts` – sign-in logic and Google handler.
-   - `types/auth.ts` – `AuthForm` interface.
+   - `app/pages/auth/login.vue`
+   - `app/stores/auth.ts`
+   - `app/composables/auth/useAuthLogin.ts`
+   - `app/types/auth.ts`
 
-3. **Types (in `app/types/auth.ts`)**
-   - `export interface AuthForm { email: string; password: string; rememberMe: boolean }`
-   - Used in `login.vue` as the shape for `form`.
+3. **Types (`app/types/auth.ts`)**
+   ```typescript
+   export interface AuthForm {
+     email: string
+     password: string
+     rememberMe: boolean
+   }
+   ```
 
-4. **Composable (in `app/composables/auth/useAuthLogin.ts`)**
-   - Exposes: `{ loading, error, handleSignIn, handleGoogleSignIn }`.
-   - `handleSignIn(form: AuthForm)` performs the email/password login.
-   - `handleGoogleSignIn()` triggers Google OAuth.
-   - `loading` and `error` are consumed by the page to render button states and error box.
+4. **Store (`app/stores/auth.ts`)**
+   - Manages: `user`, `token`, `isAuthenticated`, `permissions`
+   - Persisted fields: `token`, `user`, `isAuthenticated`
 
-5. **Template (in `pages/auth/login.vue`)**
-   - **Left column** (`md:w-3/5`):
-     - Background: `bg-gradient-to-br from-primary-strong to-primary`.
-     - Floating circular shape using `bg-primary-soft` and `.decorative-shape`.
-     - White circular icon with checkmark and brand title “Trackly”.
-     - Heading “Welcome Back” + short description.
-   - **Right column** (`md:w-2/5`):
-     - Centered card: `bg-surface rounded-3xl shadow-soft border border-border-subtle px-8 py-10`.
-     - Mobile logo row (icon in `bg-primary` and Trackly title in `text-text-main`).
-     - Heading “Sign in to Trackly” with subtitle in `text-text-muted`.
-     - `UInput` for email/username and **`UPassword`** for password.
-     - Checkbox for “Remember me” and NuxtLink “Forgot Password?”.
-     - Primary `UButton` “Sign In”.
-     - Divider “Or continue with”.
-     - Soft `UButton` with Google icon and label “Sign in with Google”.
-     - Footer text with “Sign Up” link.
+5. **Composable (`app/composables/auth/useAuthLogin.ts`)**
+   - `handleSignIn(form)` - Email/password login API call
+   - `handleGoogleSignIn()` - Google OAuth
+   - Updates `authStore` on success
 
-6. **Script (`<script setup lang="ts">`)**
-   - Imports:
-     - `ref` from `vue`.
-     - `AuthForm` from `@/types/auth`.
-     - `useAuthLogin` from `@/composables/auth/useAuthLogin`.
-   - Page meta:
-     - `definePageMeta({ layout: 'blank' })` to hide global header/footer.
-   - State:
-     - `form = ref<AuthForm>({ email: '', password: '', rememberMe: false })`.
-     - Destructure composable: `{ loading, error, handleSignIn, handleGoogleSignIn }`.
-   - `onSubmit`:
-     - Basic guard that checks `email` and `password`.
-     - Calls `await handleSignIn(form.value)`.
+6. **Template**
+   - Left column: Brand gradient, decorative shapes, welcome text
+   - Right column: Login card with form inputs, buttons
+   - All styling via Tailwind utilities
 
-7. **Styles (`<style scoped lang="postcss">`)**
-   - Keyframes `float` and `.decorative-shape` to animate the circular shape on the left column.
-   - Uses Tailwind `@apply` for transitions on `.u-button:hover`.
-   - (Optional future improvement) swap remaining hard-coded blue utilities in scoped CSS for `ring-primary` / variable-backed utilities.
+---
 
-8. **AI Prompt Notes**
-   - Prompt used: “update `login.vue` and make it exact like given design and use variable for color, create design as it is in image except password use Nuxt/ui password field”.
-   - Notes:
-     - Colors in the template rely on Tailwind classes (`bg-primary`, `bg-primary-soft`, `text-text-main`, etc.) which map to CSS variables in `variables.css`.
-     - Password field uses Nuxt UI `UPassword` component instead of a custom toggle.
+====== Page / Feature: Global Layout (Header + Sidebar) ======
+
+1. **Context / Goal**
+   - Persistent header with search, timer, notifications, profile
+   - Collapsible sidebar with navigation sections
+
+2. **Related files**
+   - `app/layouts/default.vue`
+   - `app/components/layout/Header.vue`
+   - `app/components/layout/Sidebar.vue`
+   - `app/components/layout/NavItem.vue`
+   - `app/components/layout/MenuSection.vue`
+   - `app/stores/layout.ts`
+   - `app/stores/navigation.ts`
+
+3. **Stores**
+   - `useLayoutStore`: sidebar state, header menus, theme, responsive breakpoints
+   - `useNavigationStore`: nav items, active item
+
+4. **Template**
+   - Header: Fixed top, breadcrumb, timer widget, search, notifications, profile dropdown
+   - Sidebar: Fixed left, logo, nav sections, user footer
+   - All Tailwind utilities, Icon component for icons

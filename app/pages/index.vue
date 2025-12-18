@@ -115,8 +115,5 @@ import { useAuthState } from '~/composables/auth/useAuthState'
 
 const { displayName } = useAuthState()
 
-definePageMeta({
-  layout: 'default'
-})
 </script>
 

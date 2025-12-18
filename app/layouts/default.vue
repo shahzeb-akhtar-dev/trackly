@@ -1,16 +1,18 @@
 <template>
-  <div class="layout">
+  <div class="flex h-screen bg-gray-100 overflow-hidden">
     <!-- Sidebar -->
     <Sidebar />
 
     <!-- Main Content -->
-    <div class="layout__content">
+    <div 
+      class="flex flex-col flex-1 overflow-hidden transition-all duration-300 ml-64 lg:ml-64 max-lg:ml-0"
+    >
       <!-- Header -->
       <Header />
 
       <!-- Page Content -->
-      <main class="layout__main">
-        <div class="layout__page">
+      <main class="flex-1 overflow-y-auto pt-16">
+        <div class="p-6 max-w-7xl mx-auto w-full md:p-8">
           <NuxtPage />
         </div>
       </main>
@@ -22,42 +24,3 @@
 import Sidebar from '~/components/layout/Sidebar.vue'
 import Header from '~/components/layout/Header.vue'
 </script>
-
-<style scoped lang="postcss">
-.layout {
-  display: flex;
-  height: 100vh;
-  background-color: rgb(var(--color-surface));
-  overflow: hidden;
-}
-
-.layout__content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-  margin-left: var(--layout-sidebar-width);
-  transition: margin-left var(--transition-base);
-
-  @media (max-width: 1024px) {
-    margin-left: 0;
-  }
-}
-
-.layout__main {
-  flex: 1;
-  overflow-y: auto;
-  padding-top: var(--layout-header-height);
-}
-
-.layout__page {
-  padding: 24px;
-  max-width: var(--layout-content-max-width);
-  margin: 0 auto;
-  width: 100%;
-
-  @media (max-width: 768px) {
-    padding: 16px;
-  }
-}
-</style>

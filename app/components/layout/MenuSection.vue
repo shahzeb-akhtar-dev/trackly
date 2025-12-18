@@ -1,32 +1,43 @@
 <template>
-  <div class="menu-section">
+  <div class="space-y-1">
     <!-- Section Header with Toggle -->
     <button
-      class="menu-section__header"
+      class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+      :class="{ 'justify-center px-2': collapsed }"
       @click="$emit('toggle')"
       :aria-expanded="isExpanded"
     >
-      <span class="menu-section__title">{{ section.label }}</span>
-      <svg
-        class="menu-section__chevron"
-        :class="{ 'menu-section__chevron--open': isExpanded }"
-        viewBox="0 0 20 20"
-        fill="currentColor"
+      <!-- Icon for collapsed state -->
+      <Icon 
+        v-if="section.icon"
+        :name="getIconName(section.icon)"
+        class="w-5 h-5 flex-shrink-0 text-gray-400"
+      />
+
+      <span 
+        class="flex-1 text-left truncate"
+        :class="{ 'hidden': collapsed }"
       >
-        <path
-          fill-rule="evenodd"
-          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-          clip-rule="evenodd"
-        />
-      </svg>
+        {{ section.label }}
+      </span>
+      
+      <Icon
+        v-if="!collapsed"
+        name="heroicons:chevron-down"
+        class="w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0"
+        :class="{ 'rotate-180': isExpanded }"
+      />
     </button>
 
     <!-- Menu Items Container -->
     <div
-      class="menu-section__content"
-      :class="{ 'menu-section__content--open': isExpanded }"
+      v-if="!collapsed"
+      class="overflow-hidden transition-all duration-300"
+      :class="isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'"
     >
-      <slot name="items" />
+      <div class="space-y-1 pl-2">
+        <slot name="items" />
+      </div>
     </div>
   </div>
 </template>
@@ -37,76 +48,18 @@ import type { NavigationItem } from '~/types/layout'
 interface Props {
   section: NavigationItem
   isExpanded: boolean
+  collapsed?: boolean
 }
 
 defineProps<Props>()
+defineEmits<{ toggle: [] }>()
 
-const emit = defineEmits<{
-  toggle: []
-}>()
+const iconMap: Record<string, string> = {
+  'cog': 'heroicons:cog-6-tooth',
+}
+
+const getIconName = (icon?: string) => {
+  if (!icon) return 'heroicons:folder'
+  return iconMap[icon] || 'heroicons:folder'
+}
 </script>
-
-<style scoped lang="postcss">
-/* =========================================
-   MENU SECTION COMPONENT - STYLES
-========================================= */
-
-.menu-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.menu-section__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 8px 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: rgb(var(--color-text-main));
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
-  font-weight: 600;
-  font-size: 14px;
-
-  &:hover {
-    background-color: rgb(var(--color-surface-alt));
-    color: rgb(var(--color-primary));
-  }
-}
-
-.menu-section__title {
-  flex: 1;
-  text-align: left;
-}
-
-.menu-section__chevron {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  transition: transform var(--transition-fast);
-  color: rgb(var(--color-text-muted));
-}
-
-.menu-section__chevron--open {
-  transform: rotate(180deg);
-}
-
-.menu-section__content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: all var(--transition-base);
-}
-
-.menu-section__content--open {
-  max-height: 500px;
-  opacity: 1;
-  padding: 4px 0 8px 0;
-}
-</style>
