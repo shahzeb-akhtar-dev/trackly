@@ -2,7 +2,7 @@
   <component
     :is="item.route ? 'NuxtLink' : 'button'"
     :to="item.route"
-    class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+    class="flex items-center gap-3 w-full cursor-pointer! px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
     :class="[
       active 
         ? 'bg-blue-50 text-blue-600' 
@@ -13,16 +13,17 @@
     :aria-current="active ? 'page' : undefined"
     @click="$emit('click')"
   >
-    <!-- Icon -->
+    <!-- Icon (hidden for sub-menu items) -->
     <Icon 
+      v-if="!isChild"
       :name="getIconName(item.icon)"
-      class="w-5 h-5 flex-shrink-0"
+      class="size-6 shrink-0"
       :class="active ? 'text-blue-600' : 'text-gray-400'"
     />
 
     <!-- Label -->
     <span 
-      class="flex-1 text-left truncate transition-opacity duration-200"
+      class="flex-1 text-left truncate transition-opacity duration-200 cursor-pointer"
       :class="{ 'hidden': collapsed }"
     >
       {{ item.label }}
@@ -62,25 +63,17 @@ const getBadgeClasses = (variant: string) => {
   return variants[variant] || variants.info
 }
 
-const iconMap: Record<string, string> = {
-  'chart-bar': 'heroicons:chart-bar',
-  'cog': 'heroicons:cog-6-tooth',
-  'briefcase': 'heroicons:briefcase',
-  'clock': 'heroicons:clock',
-  'credit-card': 'heroicons:credit-card',
-  'document': 'heroicons:document-text',
-  'chat': 'heroicons:chat-bubble-left-right',
-  'users': 'heroicons:users',
-  'key': 'heroicons:key',
-  'check-circle': 'heroicons:check-circle',
-  'tasks': 'heroicons:clipboard-document-list',
-  'th': 'heroicons:squares-2x2',
-  'calendar': 'heroicons:calendar',
-  'hourglass': 'heroicons:clock',
+const moduleIconMap: Record<string, string> = {
+  'dashboard': 'material-symbols:dashboard-outline-rounded',
+  'settings': 'famicons:settings-outline',
+  'projects-tasks': 'line-md:clipboard-check',
+  'time-management': 'mage:clock',
+  'payroll': 'la:hand-holding-usd',
+  'reports': 'mdi:analytics',
+  'chat': 'material-symbols:chat-outline-sharp',
 }
-
 const getIconName = (icon?: string) => {
-  if (!icon) return 'heroicons:circle-stack'
-  return iconMap[icon] || 'heroicons:circle-stack'
+  if (!icon) return ''
+  return moduleIconMap[icon] || ''
 }
 </script>

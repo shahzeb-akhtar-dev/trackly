@@ -11,7 +11,7 @@
       <Icon 
         v-if="section.icon"
         :name="getIconName(section.icon)"
-        class="w-5 h-5 flex-shrink-0 text-gray-400"
+        class="w-5 h-5 shrink-0 text-gray-400"
       />
 
       <span 
@@ -24,7 +24,7 @@
       <Icon
         v-if="!collapsed"
         name="heroicons:chevron-down"
-        class="w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0"
+        class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0"
         :class="{ 'rotate-180': isExpanded }"
       />
     </button>
@@ -54,12 +54,13 @@ interface Props {
 defineProps<Props>()
 defineEmits<{ toggle: [] }>()
 
-const iconMap: Record<string, string> = {
-  'cog': 'heroicons:cog-6-tooth',
+const sectionIconMap: Record<string, string> = {
+  'settings': 'famicons:settings-outline',
+  'reports': 'mdi:analytics',
 }
 
 const getIconName = (icon?: string) => {
   if (!icon) return 'heroicons:folder'
-  return iconMap[icon] || 'heroicons:folder'
+  return sectionIconMap[icon] || 'heroicons:folder'
 }
 </script>

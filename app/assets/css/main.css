@@ -91,7 +91,9 @@
 /* =========================================
    TAILWIND v4 THEME TOKENS (RGB)
 ========================================= */
-@theme {
+/* Note: @theme directive requires specific PostCSS configuration */
+/* Using CSS custom properties instead for compatibility */
+:root {
   --color-primary: var(--color-primary);
   --color-primary-soft: var(--color-primary-soft);
   --color-primary-strong: var(--color-primary-strong);
@@ -127,3 +129,24 @@
 .text-text-muted { color: var(--color-text-muted); }
 .border-border-subtle { border-color: var(--color-border-subtle); }
 .shadow-soft { box-shadow: var(--shadow-soft); }
+
+
+/* Scrollbar styling */
+/* For WebKit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface-alt);
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-400);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-gray-500);
+}
+::-webkit-scrollbar-corner {
+  background: var(--color-surface-alt);
+}

@@ -345,3 +345,170 @@ For every major page or feature, create a section:
    - Header: Fixed top, breadcrumb, timer widget, search, notifications, profile dropdown
    - Sidebar: Fixed left, logo, nav sections, user footer
    - All Tailwind utilities, Icon component for icons
+
+---
+
+====== Page / Feature: Time Tracking - Global Timer ======
+
+1. **Context / Goal**
+   - Real-time timer visible in header on every page
+   - Track active task work across entire application
+   - Start/pause/resume/stop timer with automatic time log creation
+   - One active timer per user at any time
+
+2. **Related files**
+   - `app/components/time-tracking/TimerWidget.vue` - Timer UI component (block + inline variants)
+   - `app/components/layout/Header.vue` - Inline timer widget in header
+   - `app/composables/time-tracking/useTimer.ts` - Timer state & API logic
+   - `app/types/timer.ts` - Timer & TimeLog interfaces
+   - Backend: `/api/timers/*` - Timer management endpoints
+
+3. **Types (`app/types/timer.ts`)**
+   ```typescript
+   export interface Timer {
+     id: number
+     user_id: number
+     company_id: number
+     task_id: number
+     project_id: number
+     task: Task
+     project: Project
+     started_at: string     // ISO timestamp
+     paused_at: string | null
+     paused_duration_seconds: number
+     is_running: boolean
+     is_paused: boolean
+     notes: string | null
+     created_at: string
+     updated_at: string
+   }
+
+   export interface TimeLog {
+     id: number
+     task_id: number
+     user_id: number
+     date_logged: string
+     start_time: string
+     end_time: string
+     duration_seconds: number
+     duration_hours: number
+     description: string | null
+     status: 'logged' | 'pending_approval' | 'approved' | 'rejected'
+     created_at: string
+     updated_at: string
+   }
+   ```
+
+4. **Composable (`app/composables/time-tracking/useTimer.ts`)**
+   - State: `activeTimer`, `loading`, `error`, `elapsedSeconds`
+   - Computed: `isRunning`, `isPaused`
+   - Actions:
+     - `getActiveTimer()` - Fetch active timer (GET /api/timers/active)
+     - `startTimer(taskId, notes?)` - Start new timer (POST /api/timers/start)
+     - `pauseTimer()` - Pause running timer (PATCH /api/timers/active/pause)
+     - `resumeTimer()` - Resume paused timer (PATCH /api/timers/active/resume)
+     - `stopTimer(description?)` - Stop & create time log (POST /api/timers/active/stop)
+     - `discardTimer()` - Cancel timer (DELETE /api/timers/active)
+     - `clearError()` - Clear error state
+
+5. **Component (`app/components/time-tracking/TimerWidget.vue`)**
+   - **Props:**
+     - `variant: 'block' | 'inline'` - Display variant
+     - `taskName: string` - Current task name
+   - **Block Variant (Dashboard):**
+     - Large timer display with HH:MM:SS boxes
+     - "Current Session" header with ACTIVE badge
+     - Break (pause/resume) and Stop buttons
+     - Error message display
+   - **Inline Variant (Header):**
+     - Compact display: task name + timer + action buttons
+     - Hidden on mobile (`hidden md:flex`)
+     - Smaller icons and text
+   - **Features:**
+     - Real-time timer update (computed from elapsed seconds)
+     - Toggle Break → Resume button based on pause state
+     - Sync with server every 30 seconds
+     - Error auto-clear after 5 seconds
+     - Disabled state during API calls
+
+6. **Template Usage**
+   ```vue
+   <!-- Block variant (Dashboard) -->
+   <TimerWidget variant="block" taskName="Redesign Homepage" />
+
+   <!-- Inline variant (Header) -->
+   <TimerWidget variant="inline" taskName="Redesign Homepage" />
+   ```
+
+7. **Script Setup Pattern**
+   ```typescript
+   // 1. Import composable
+   import { useTimer } from '~/composables/time-tracking/useTimer'
+
+   // 2. Use composable
+   const timerComposable = useTimer()
+
+   // 3. Computed for display
+   const hours = computed(() => {
+     const h = Math.floor(timerComposable.elapsedSeconds / 3600)
+     return String(h).padStart(2, '0')
+   })
+
+   // 4. Methods handle actions
+   const handleBreak = async () => {
+     if (timerComposable.isPaused) {
+       await timerComposable.resumeTimer()
+     } else {
+       await timerComposable.pauseTimer()
+     }
+   }
+
+   // 5. Lifecycle syncs state
+   onMounted(async () => {
+     await timerComposable.getActiveTimer()
+     intervalId = setInterval(syncTimer, 30000)
+   })
+   ```
+
+8. **API Integration**
+   - All endpoints use `$fetch` with Authorization header
+   - Error handling: catches `e.data.message`, logs to console
+   - Loading state during API calls
+   - Response types typed from `Timer` and `TimeLog` interfaces
+
+9. **Best Practices Followed**
+   - ✅ Composable for API & state logic (not in component)
+   - ✅ Typed interfaces from `app/types/timer.ts`
+   - ✅ Strict Tailwind CSS (no inline styles)
+   - ✅ Responsive design (hidden md:flex for header)
+   - ✅ Error state management with auto-clear
+   - ✅ Disabled buttons during loading
+   - ✅ Server sync every 30 seconds
+   - ✅ Proper lifecycle cleanup (clearInterval)
+   - ✅ Icon component for Tabler icons
+   - ✅ JSDoc comments on composable functions
+
+10. **State Flow**
+    ```
+    User clicks "Break" button
+      ↓
+    TimerWidget.handleBreak()
+      ↓
+    useTimer.pauseTimer() API call
+      ↓
+    activeTimer.is_paused = true
+      ↓
+    Button icon changes: pause → play
+    Button text changes: Break → Resume
+      ↓
+    User can click again to resume
+    ```
+
+11. **Edge Cases Handled**
+    - No active timer: Error state shown
+    - API error: Error message displayed for 5 seconds
+    - Loading state: Buttons disabled, opacity reduced
+    - Pause state: Button toggles to Resume
+    - Component unmounts: Interval cleared, memory safe
+    - Timer sync: Every 30 seconds validates server state
+

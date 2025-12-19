@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 z-30 transition-all duration-300 flex flex-col"
+    class="fixed left-0 h-screen bg-white border-r border-gray-200 z-30 transition-all duration-300 flex flex-col"
     :class="{
       'w-64': !layoutStore.sidebar.isCollapsed || layoutStore.sidebar.isHovered,
       'w-16': layoutStore.sidebar.isCollapsed && !layoutStore.sidebar.isHovered,
@@ -11,8 +11,8 @@
     @mouseleave="layoutStore.handleSidebarHover(false)"
   >
     <!-- Logo Section -->
-    <div class="flex items-center gap-3 px-4 py-4 border-b border-gray-100">
-      <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+    <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+      <div class="w-10 h-10 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
         <Icon name="heroicons:clock" class="w-6 h-6 text-white" />
       </div>
       <span 
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3">
+    <nav class="flex-1 overflow-y-auto overflow-x-hidden pb-4 px-3 mt-4">
       <div class="space-y-1">
         <!-- Menu Label -->
         <p 
@@ -83,7 +83,7 @@
         <img 
           src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" 
           alt="User avatar"
-          class="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-white"
+          class="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-white"
         />
         <div 
           class="flex-1 min-w-0 transition-opacity duration-200"
@@ -93,7 +93,7 @@
           <p class="text-xs text-gray-500 truncate">Senior Developer</p>
         </div>
         <div 
-          class="w-2 h-2 bg-emerald-500 rounded-full flex-shrink-0"
+          class="w-2 h-2 bg-emerald-500 rounded-full shrink-0"
           :class="{ 'absolute bottom-0 right-0': layoutStore.sidebar.isCollapsed && !layoutStore.sidebar.isHovered }"
         ></div>
       </div>
@@ -113,6 +113,8 @@
 import { useLayoutStore } from '~/stores/layout'
 import { useNavigationStore } from '~/stores/navigation'
 import type { NavigationItem } from '~/types/layout'
+import MenuSection from './MenuSection.vue'
+import NavItem from './NavItem.vue'
 
 const layoutStore = useLayoutStore()
 const navStore = useNavigationStore()

@@ -17,14 +17,14 @@ export const useNavigationStore = defineStore('navigation', () => {
       id: 'dashboard',
       label: 'Dashboard',
       type: 'link',
-      icon: 'chart-bar',
+      icon: 'dashboard',
       route: '/',
     },
     {
       id: 'settings-section',
       label: 'Settings',
       type: 'section',
-      icon: 'cog',
+      icon: 'settings',
       children: [
         {
           id: 'company-profile',
@@ -74,28 +74,28 @@ export const useNavigationStore = defineStore('navigation', () => {
       id: 'projects-tasks',
       label: 'Project & Tasks',
       type: 'link',
-      icon: 'briefcase',
+      icon: 'projects-tasks',
       route: '/projects',
     },
     {
       id: 'time-management',
       label: 'Time Management',
       type: 'link',
-      icon: 'clock',
+      icon: 'time-management',
       route: '/time-management',
     },
     {
       id: 'payroll',
       label: 'Payroll',
       type: 'link',
-      icon: 'credit-card',
+      icon: 'payroll',
       route: '/payroll',
     },
     {
       id: 'reports-section',
       label: 'Reports',
       type: 'section',
-      icon: 'document',
+      icon: 'reports',
       children: [
         {
           id: 'attendance',
