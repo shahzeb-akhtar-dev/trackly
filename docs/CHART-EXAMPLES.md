@@ -100,19 +100,19 @@ import PieChart from '~/components/charts/PieChart.vue'
   <div class="space-y-6">
     <!-- Stats Cards -->
     <div class="grid grid-cols-3 gap-6">
-      <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
         <p class="text-3xl font-bold text-emerald-600">65%</p>
         <p class="text-sm text-gray-600 mt-2">Completed</p>
         <p class="text-xs text-gray-500">{{ completedCount }} tasks done</p>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
         <p class="text-3xl font-bold text-red-600">20%</p>
         <p class="text-sm text-gray-600 mt-2">Delayed</p>
         <p class="text-xs text-gray-500">{{ delayedCount }} tasks overdue</p>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
         <p class="text-3xl font-bold text-amber-600">15%</p>
         <p class="text-sm text-gray-600 mt-2">Pending</p>
         <p class="text-xs text-gray-500">{{ pendingCount }} in progress</p>
@@ -211,7 +211,7 @@ import AreaChart from '~/components/charts/AreaChart.vue'
 <template>
   <div class="space-y-8">
     <!-- Header Section -->
-    <div class="bg-white border border-gray-200 rounded-2xl p-8">
+    <div class="bg-white border border-gray-200 rounded-xl p-8">
       <h1 class="text-3xl font-bold text-gray-900">{{ report.title }}</h1>
       <p class="text-gray-600 mt-2">{{ report.description }}</p>
       <div class="flex gap-4 mt-4">
@@ -226,7 +226,7 @@ import AreaChart from '~/components/charts/AreaChart.vue'
 
     <!-- Charts Section -->
     <div class="space-y-6">
-      <div v-for="chart in report.charts" :key="chart.id" class="bg-white border border-gray-200 rounded-2xl p-6">
+      <div v-for="chart in report.charts" :key="chart.id" class="bg-white border border-gray-200 rounded-xl p-6">
         <!-- Dynamic Chart Rendering -->
         <component
           :is="getChartComponent(chart.type)"
@@ -295,19 +295,19 @@ const getChartComponent = (type: string) => {
   <div class="space-y-6">
     <!-- KPI Cards -->
     <div class="grid grid-cols-4 gap-4">
-      <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
         <p class="text-sm text-gray-600">Productivity</p>
         <p class="text-2xl font-bold mt-2">92%</p>
       </div>
-      <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
         <p class="text-sm text-gray-600">Quality Score</p>
         <p class="text-2xl font-bold mt-2">4.8/5</p>
       </div>
-      <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
         <p class="text-sm text-gray-600">On-Time Delivery</p>
         <p class="text-2xl font-bold mt-2">97%</p>
       </div>
-      <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
         <p class="text-sm text-gray-600">Satisfaction</p>
         <p class="text-2xl font-bold mt-2">4.6/5</p>
       </div>

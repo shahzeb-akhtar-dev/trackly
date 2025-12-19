@@ -1,56 +1,66 @@
 <template>
-  <div ref="chartElement" class="w-full"></div>
+  <div class="w-full">
+    <apexchart
+      :type="type"
+      :series="series"
+      :options="chartOptions"
+      :height="height"
+      :width="width"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue'
-import ApexCharts from 'apexcharts'
+import type { ApexOptions } from 'apexcharts'
 
 interface Props {
-  type: string
-  series: any[]
-  options?: any
+  type: 'line' | 'area' | 'bar' | 'histogram' | 'pie' | 'donut' | 'radialBar' | 'scatter' | 'bubble' | 'heatmap' | 'treemap' | 'boxPlot' | 'candlestick' | 'radar' | 'polarArea' | 'rangeBar'
+  series: ApexAxisChartSeries | ApexNonAxisChartSeries
+  options?: ApexOptions
   height?: number | string
+  width?: number | string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   height: 400,
+  width: '100%',
 })
 
-const chartElement = ref<HTMLElement | null>(null)
-let chart: ApexCharts | null = null
-
-const mergedOptions = computed(() => ({
-  ...props.options,
+const chartOptions = computed(() => ({
   chart: {
-    ...props.options?.chart,
-    type: props.type,
-    height: props.height,
+    toolbar: {
+      show: false,
+    },
+    zoom: {
+      enabled: false,
+    },
   },
+  dataLabels: {
+    enabled: false,
+  },
+  stroke: {
+    curve: 'smooth' as const,
+  },
+  xaxis: {
+    labels: {
+      style: {
+        colors: '#6b7280',
+        fontSize: '12px',
+      },
+    },
+  },
+  yaxis: {
+    labels: {
+      style: {
+        colors: '#6b7280',
+        fontSize: '12px',
+      },
+    },
+  },
+  grid: {
+    borderColor: '#e5e7eb',
+    strokeDashArray: 4,
+  },
+  ...props.options,
 }))
-
-const initChart = () => {
-  if (chartElement.value && !chart) {
-    chart = new ApexCharts(chartElement.value, {
-      ...mergedOptions.value,
-      series: props.series,
-    })
-    chart.render()
-  }
-}
-
-const updateChart = async () => {
-  if (chart) {
-    await chart.updateOptions(mergedOptions.value)
-    await chart.updateSeries(props.series)
-  }
-}
-
-onMounted(() => {
-  initChart()
-})
-
-watch([() => props.series, () => props.options], () => {
-  updateChart()
-}, { deep: true })
 </script>

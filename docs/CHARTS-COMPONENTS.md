@@ -255,7 +255,7 @@ colors = {
 
 All components use **Tailwind CSS exclusively**:
 - White background with gray border
-- 2px rounded corners (rounded-2xl)
+- 2px rounded corners (rounded-xl)
 - Subtle shadow-sm
 - Responsive design (mobile-optimized)
 - Consistent padding (p-6)
@@ -351,7 +351,7 @@ Combine with **RadialChart** for percentage display:
 
 ```vue
 <div class="grid grid-cols-3 gap-6">
-  <div class="bg-white border rounded-2xl p-6">
+  <div class="bg-white border rounded-xl p-6">
     <p class="text-4xl font-bold">65%</p>
     <p class="text-sm text-gray-600 mt-2">Completed</p>
   </div>

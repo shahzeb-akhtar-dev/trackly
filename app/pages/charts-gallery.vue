@@ -101,7 +101,7 @@
         <h2 class="text-2xl font-bold text-gray-900 mb-6">Dashboard Example</h2>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <!-- Stats Cards -->
-          <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-4xl font-bold text-gray-900">65%</p>
@@ -114,7 +114,7 @@
             </div>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-4xl font-bold text-gray-900">20%</p>
@@ -127,7 +127,7 @@
             </div>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-4xl font-bold text-gray-900">15%</p>

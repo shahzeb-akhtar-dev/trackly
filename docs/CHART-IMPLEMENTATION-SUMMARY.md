@@ -97,7 +97,7 @@ All components follow strict Nuxt/Tailwind patterns:
 ### Tailwind Classes Used
 ```
 - bg-white, border border-gray-200
-- rounded-2xl (consistent 2px border radius)
+- rounded-xl (consistent 2px border radius)
 - p-6 (consistent padding)
 - shadow-sm (subtle shadows)
 - Responsive grid: grid-cols-1 lg:grid-cols-2

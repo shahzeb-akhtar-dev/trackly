@@ -12,8 +12,8 @@
         <Header />
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto pt-16">
-          <div class="p-6 max-w-7xl mx-auto w-full md:p-8">
+        <main class="flex-1 overflow-y-auto">
+          <div class="p-4 mx-auto w-full">
             <NuxtPage />
           </div>
         </main>

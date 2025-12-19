@@ -6,11 +6,16 @@ export interface Task {
   id: number
   title: string
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
+  description?: string
+  priority?: 'low' | 'medium' | 'high'
+  estimatedHours?: number
+  assignedToYou?: boolean
 }
 
 export interface Project {
   id: number
   name: string
+  tasks?: Task[]
 }
 
 export interface Timer {

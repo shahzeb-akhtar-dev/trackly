@@ -12,7 +12,7 @@
     </div>
 
     <!-- Chart Container -->
-    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+    <div v-if="!noWrapper" class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <apexchart
         type="bar"
         :options="mergedOptions"
@@ -20,6 +20,13 @@
         :height="height"
       />
     </div>
+    <apexchart
+      v-else
+      type="bar"
+      :options="mergedOptions"
+      :series="series"
+      :height="height"
+    />
 
     <!-- Legend Section -->
     <div v-if="showLegend && legendItems.length > 0" class="flex items-center justify-center gap-6 mt-6">
@@ -50,6 +57,7 @@ interface Props {
   legendColors?: string[]
   colorScheme?: 'default' | 'success' | 'warning' | 'danger'
   options?: any
+  noWrapper?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -59,6 +67,7 @@ const props = withDefaults(defineProps<Props>(), {
   legendItems: () => [],
   legendColors: () => [],
   colorScheme: 'default',
+  noWrapper: false,
 })
 
 const chartDefaults = useChartDefaults()
@@ -72,14 +81,17 @@ const colorMap = {
 
 const mergedOptions = computed(() => {
   const baseOptions = chartDefaults.getBarChartDefaults()
+  const customOptions = props.options || {}
+  
   return {
     ...baseOptions,
-    colors: colorMap[props.colorScheme],
+    colors: customOptions.colors || colorMap[props.colorScheme],
     xaxis: {
       ...baseOptions.xaxis,
-      categories: props.categories || (baseOptions.xaxis as any).categories,
+      ...customOptions.xaxis,
+      categories: props.categories || customOptions.xaxis?.categories || (baseOptions.xaxis as any).categories,
     },
-    ...props.options,
+    ...customOptions,
   }
 })
 </script>
