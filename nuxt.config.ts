@@ -10,4 +10,18 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
   },
+  ui:{
+    theme: {
+     colors: ['primary', 'secondary', 'success', 'info', 'warning', 'error'],
+      
+      // Enable/disable transitions
+      transitions: true,
+       // Set default variants for all components
+      defaultVariants: {
+        color: 'primary',
+        size: 'md'
+      },
+      
+  }
+}
 })

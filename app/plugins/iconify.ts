@@ -1,5 +1,7 @@
 import { Icon } from '@iconify/vue';
 
 export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.component('Icon', Icon);
+  if (!nuxtApp.vueApp.component('Icon')) {
+    nuxtApp.vueApp.component('Icon', Icon);
+  }
 });

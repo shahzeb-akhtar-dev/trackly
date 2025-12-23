@@ -9,7 +9,8 @@ Every new page / feature should follow this structure so that code is:
 - **Typed** via shared interfaces in `app/types`  
 - **State managed** via Pinia stores in `app/stores` for shared data
 - **Composable** in `app/composables` for API calls and local logic
-- **Visually consistent** via **Tailwind CSS utilities** strictly
+- **Component library** via **Nuxt UI** for consistent UI components
+- **Visually consistent** via **CSS variables (theme tokens)** strictly
 
 ---
 
@@ -187,8 +188,9 @@ export const useProjects = () => {
 
 #### ❌ FORBIDDEN:
 
-- ❌ Hardcoded colors: `style="color: #0052cc"`
-- ❌ Inline styles: `style="padding: 16px"`
+- ❌ Hardcoded colors: `style="color: #0052cc"` or `class="text-blue-600"`
+- ❌ Static color utilities: `bg-white`, `text-gray-900`, `border-gray-200`
+- ❌ Inline non-semantic styles: `style="padding: 16px"`
 - ❌ `<style scoped>` blocks with custom CSS (except keyframes)
 - ❌ CSS-in-JS or external CSS files per component
 - ❌ `@apply` directive (use utility classes directly)
@@ -209,21 +211,108 @@ export const useProjects = () => {
 
 ---
 
-### ✅ Icon Usage
+### ✅ Nuxt UI Component Usage
 
-Use `@nuxt/icon` with Iconify icons:
+**Use Nuxt UI components for all interactive UI elements.** Nuxt UI is pre-configured and provides:
+- Consistent styling with theme tokens
+- Accessibility out of the box
+- Responsive design
+- Built-in state management (disabled, loading, etc.)
+
+#### Common Nuxt UI Components:
 
 ```vue
-<Icon name="heroicons:chart-bar" class="w-5 h-5 text-gray-600" />
-<Icon name="heroicons:user-solid" class="w-6 h-6" />
-<Icon name="lucide:settings" class="w-4 h-4" />
+<!-- Button -->
+<UButton color="primary" @click="handleClick">
+  Click me
+</UButton>
+
+<!-- Modal -->
+<UModal v-model="isOpen">
+  <div class="p-6">
+    Modal content here
+  </div>
+</UModal>
+
+<!-- Badge -->
+<UBadge color="success" variant="subtle">
+  Active
+</UBadge>
+
+<!-- Input -->
+<UInput
+  v-model="form.name"
+  placeholder="Enter name"
+  color="primary"
+/>
+
+<!-- Card -->
+<UCard>
+  <template #header>
+    <h2>Card Title</h2>
+  </template>
+  Card content
+</UCard>
+
+<!-- Dropdown -->
+<UDropdown :items="items" :popper="{ placement: 'bottom-start' }">
+  <UButton icon="i-heroicons-ellipsis-horizontal-20-solid" color="gray" variant="ghost" />
+</UDropdown>
 ```
 
-Common icon sets:
-- `heroicons:` - Heroicons (outline)
-- `heroicons:*-solid` - Heroicons (solid)
-- `lucide:` - Lucide icons
-- `mdi:` - Material Design Icons
+#### Color Options for Nuxt UI:
+- `color="primary"` - Main brand color
+- `color="secondary"` - Secondary/gray
+- `color="success"` - Green
+- `color="warning"` - Yellow
+- `color="error"` - Red
+- `color="info"` - Blue
+
+#### Variant Options:
+- `variant="solid"` (default) - Filled button
+- `variant="soft"` - Soft background
+- `variant="outline"` - Outlined button
+- `variant="ghost"` - No background/border
+- `variant="subtle"` - Light background
+
+---
+
+### ✅ Theme CSS Variables Reference
+
+**All colors must come from CSS variables defined in `app/assets/css/main.css`:**
+
+```css
+:root {
+  /* BRAND */
+  --color-primary: #0052cc;
+  
+  /* SURFACE */
+  --color-surface: rgb(255 255 255);
+  --color-surface-alt: rgb(245 247 250);
+  
+  /* BORDERS */
+  --color-border-subtle: rgb(229 231 235);
+  --color-border-strong: rgb(209 213 219);
+  
+  /* TEXT */
+  --color-text-main: rgb(17 24 39);
+  --color-text-muted: rgb(107 114 128);
+  --color-text-on-primary: rgb(255 255 255);
+  
+  /* SYSTEM STATES */
+  --ui-color-success-500: rgb(34 197 94);
+  --ui-color-error-500: rgb(239 68 68);
+  --ui-color-warning-500: rgb(234 179 8);
+}
+```
+
+**Usage in components:**
+
+```vue
+<div style="color: rgb(var(--color-text-main)); background-color: rgb(var(--color-surface))">
+  Content
+</div>
+```
 
 ---
 

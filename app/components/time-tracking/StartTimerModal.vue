@@ -1,165 +1,212 @@
 <template>
-  <Teleport to="body">
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      @click.self="handleClose"
-    >
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-gray-900">Start Timer</h2>
-          <button
-            class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            @click="handleClose"
+  <UModal 
+    v-model:open="isOpen" 
+    :title="timerActive ? 'Active Timer' : 'Start Timer'" 
+    :scrollable="true"
+    class="bg-white min-w-4xl text-black"
+    :transition="true"
+    prevent-close
+  >
+    <!-- Timer Display (when active) -->
+    <template v-if="timerActive" #body>
+      <div class="p-6 space-y-6 ">
+        <!-- Timer Display -->
+        <div class="text-center space-y-4">
+          <div class="text-6xl font-bold text-gray-900 font-mono tracking-tight">
+            {{ formattedTime }}
+          </div>
+          <div class="space-y-2">
+            <p class="text-lg font-semibold text-gray-900">
+              {{ activeTask?.title }}
+            </p>
+            <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
+              <Icon name="heroicons:folder" class="w-4 h-4" />
+              <span>{{ activeProject?.name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timer Controls -->
+        <div class="flex items-center justify-center gap-3">
+          <UButton
+            v-if="isPaused"
+            color="primary"
+            size="lg"
+            icon="heroicons:play-solid"
+            @click="resumeTimer"
           >
-            <Icon name="heroicons:x-mark" class="w-5 h-5" />
-          </button>
+            Resume
+          </UButton>
+          <UButton
+            v-else
+            color="secondary"
+            size="lg"
+            icon="heroicons:pause-solid"
+            @click="pauseTimer"
+          >
+            Pause
+          </UButton>
+          
+          <UButton
+            color="error"
+            size="lg"
+            icon="heroicons:stop-solid"
+            variant="outline"
+            @click="stopTimer"
+          >
+            Stop
+          </UButton>
         </div>
 
-        <!-- Content -->
-        <div class="flex-1 overflow-hidden flex">
-          <!-- Left: Projects -->
-          <div class="w-1/3 border-r border-gray-200 overflow-y-auto">
-            <div class="p-4">
-              <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Projects</h3>
-              <div class="space-y-1">
-                <button
-                  v-for="project in projects"
-                  :key="project.id"
-                  class="w-full flex items-start gap-3 p-3 rounded-lg transition-colors text-left"
-                  :class="
-                    selectedProject?.id === project.id
-                      ? 'bg-blue-50 border-2 border-blue-500'
-                      : 'hover:bg-gray-50 border-2 border-transparent'
-                  "
-                  @click="selectProject(project)"
-                >
-                  <div
-                    class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                    :class="
-                      selectedProject?.id === project.id
-                        ? 'bg-blue-500'
-                        : 'bg-gray-100'
-                    "
-                  >
-                    <Icon :name="getProjectIcon(project.name)" class="w-5 h-5" :class="selectedProject?.id === project.id ? 'text-white' : 'text-gray-600'" />
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p
-                      class="font-medium text-sm truncate"
-                      :class="selectedProject?.id === project.id ? 'text-blue-600' : 'text-gray-900'"
-                    >
-                      {{ project.name }}
-                    </p>
-                    <p
-                      class="text-xs mt-1"
-                      :class="selectedProject?.id === project.id ? 'text-blue-600' : 'text-gray-500'"
-                    >
-                      {{ getProjectTaskCount(project.id) }} active tasks
-                    </p>
-                  </div>
-                </button>
-              </div>
+        <!-- Task Details -->
+        <div class="pt-4 border-t border-gray-200">
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p class="text-gray-600 mb-1">Started at</p>
+              <p class="font-medium text-gray-900">{{ startTime }}</p>
             </div>
-          </div>
-
-          <!-- Right: Tasks -->
-          <div class="flex-1 overflow-y-auto">
-            <div class="p-4">
-              <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Available Tasks</h3>
-              <p v-if="!selectedProject" class="text-sm text-gray-500 mb-4">
-                Select a project to view tasks
+            <div>
+              <p class="text-gray-600 mb-1">Estimated</p>
+              <p class="font-medium text-gray-900">
+                {{ activeTask?.estimatedHours || 'N/A' }}h
               </p>
-              <p v-else-if="availableTasks.length === 0" class="text-sm text-gray-500 mb-4">
-                No tasks available for {{ selectedProject.name }}
-              </p>
-              <div v-else class="space-y-2">
-                <label
-                  v-for="task in availableTasks"
-                  :key="task.id"
-                  class="flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-colors border-2"
-                  :class="
-                    selectedTask?.id === task.id
-                      ? 'bg-blue-50 border-blue-500'
-                      : 'hover:bg-gray-50 border-transparent'
-                  "
-                >
-                  <input
-                    type="radio"
-                    :value="task.id"
-                    :checked="selectedTask?.id === task.id"
-                    class="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    @change="selectTask(task)"
-                  />
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                      <p
-                        class="font-medium text-sm"
-                        :class="selectedTask?.id === task.id ? 'text-blue-600' : 'text-gray-900'"
-                      >
-                        {{ task.title }}
-                      </p>
-                      <span
-                        v-if="task.priority === 'high'"
-                        class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700"
-                      >
-                        High Priority
-                      </span>
-                    </div>
-                    <p class="text-xs text-gray-500 mb-2">{{ task.description }}</p>
-                    <div class="flex items-center gap-4 text-xs text-gray-500">
-                      <span v-if="task.estimatedHours" class="flex items-center gap-1">
-                        <Icon name="heroicons:clock" class="w-4 h-4" />
-                        {{ task.estimatedHours }}h est
-                      </span>
-                      <span v-if="task.assignedToYou" class="flex items-center gap-1">
-                        <Icon name="heroicons:user" class="w-4 h-4" />
-                        Assigned to you
-                      </span>
-                    </div>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <Icon name="heroicons:check-circle" class="w-5 h-5 text-blue-600" />
-              <div>
-                <p class="text-sm font-semibold text-gray-900">Ready to Start Tracking</p>
-                <p v-if="selectedTask" class="text-sm text-gray-600">{{ selectedTask.title }}</p>
-                <p v-else class="text-sm text-gray-400">Select a task to begin</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <button
-                class="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                @click="handleClose"
-              >
-                Cancel
-              </button>
-              <button
-                class="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="!selectedTask"
-                @click="handleStart"
-              >
-                Start
-              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </Teleport>
+    </template>
+
+    <!-- Project/Task Selection (when inactive) -->
+    <template v-else #body>
+      <div class="flex gap-0 h-96">
+        <!-- Left: Projects -->
+        <div class="w-2/6 overflow-y-auto bg-gray-50 border-r border-gray-200">
+          <div class="p-4 space-y-3">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-700">
+              Projects
+            </h3>
+            <div class="space-y-1">
+              <UButton
+                v-for="project in projects"
+                :key="project.id"
+                :color="selectedProject?.id === project.id ? 'primary' : 'secondary'"
+                :variant="selectedProject?.id === project.id ? 'soft' : 'ghost'"
+                block
+                class="justify-start"
+                @click="selectProject(project)"
+              >
+                <template #leading>
+                  <Icon :name="getProjectIcon(project.name)" class="w-4 h-4" />
+                </template>
+                <div class="flex-1 text-left min-w-0">
+                  <p class="font-medium text-sm truncate">
+                    {{ project.name }}
+                  </p>
+                  <p class="text-xs opacity-75">
+                    {{ getProjectTaskCount(project.id) }} tasks
+                  </p>
+                </div>
+              </UButton>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Tasks -->
+        <div class="flex-1 overflow-y-auto bg-white">
+          <div class="p-4 space-y-3">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-700">
+              Tasks
+            </h3>
+            <div class="space-y-1">
+              <div v-if="!selectedProject" class="py-12 text-center">
+                <Icon name="heroicons:arrow-left" class="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                <p class="text-sm text-gray-500">Select a project to view tasks</p>
+              </div>
+              
+              <div v-else-if="availableTasks.length === 0" class="py-12 text-center">
+                <Icon name="heroicons:inbox" class="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                <p class="text-sm text-gray-500">No available tasks</p>
+              </div>
+              
+              <UButton
+                v-for="task in availableTasks"
+                v-else
+                :key="task.id"
+                :color="selectedTask?.id === task.id ? 'primary' : 'secondary'"
+                :variant="selectedTask?.id === task.id ? 'soft' : 'ghost'"
+                block
+                class="justify-start h-auto py-3"
+                @click="selectTask(task)"
+              >
+                <div class="flex-1 text-left min-w-0 space-y-1">
+                  <div class="flex items-center gap-2">
+                    <p class="font-medium text-sm truncate">
+                      {{ task.title }}
+                    </p>
+                    <UBadge
+                      v-if="task.priority === 'high'"
+                      color="error"
+                      variant="subtle"
+                      size="xs"
+                    >
+                      High
+                    </UBadge>
+                  </div>
+                  <div class="flex items-center gap-3 text-xs opacity-75">
+                    <span v-if="task.estimatedHours" class="flex items-center gap-1">
+                      <Icon name="heroicons:clock" class="w-3 h-3" />
+                      {{ task.estimatedHours }}h
+                    </span>
+                    <UBadge :color="getStatusColor(task.status) " variant="subtle" size="xs">
+                      {{ task.status }}
+                    </UBadge>
+                  </div>
+                </div>
+              </UButton>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Footer -->
+    <template #footer>
+      <div class="flex items-center justify-between w-full">
+        <div v-if="!timerActive" class="flex-1 min-w-0">
+          <p v-if="selectedTask" class="text-sm font-medium truncate text-gray-900">
+            {{ selectedTask.title }}
+          </p>
+          <p v-else class="text-sm text-gray-500">
+            No task selected
+          </p>
+        </div>
+        
+        <div class="flex items-center gap-2 ml-auto">
+          <UButton
+            v-if="!timerActive"
+            color="secondary"
+            variant="ghost"
+            @click="closeModal"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            v-if="!timerActive"
+            color="primary"
+            :disabled="!selectedTask"
+            icon="heroicons:play-solid"
+            @click="handleStart"
+          >
+            Start Timer
+          </UButton>
+        </div>
+      </div>
+    </template>
+  </UModal>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import type { Project, Task } from '~/types/timer'
 
 interface ProjectWithTasks extends Project {
@@ -167,20 +214,37 @@ interface ProjectWithTasks extends Project {
 }
 
 interface Props {
-  isOpen: boolean
+  modelValue: boolean
   projects: ProjectWithTasks[]
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  close: []
-  start: [taskId: number]
+  'update:modelValue': [value: boolean]
+  start: [taskId: number, projectId: number]
+  stop: [elapsedSeconds: number]
 }>()
 
+const isOpen = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
+})
+
+// Timer state
+const timerActive = ref(false)
+const isPaused = ref(false)
+const elapsedSeconds = ref(0)
+const timerInterval = ref<NodeJS.Timeout | null>(null)
+const timerStartTime = ref<Date | null>(null)
+
+// Selection state
 const selectedProject = ref<ProjectWithTasks | null>(null)
 const selectedTask = ref<Task | null>(null)
+const activeProject = ref<ProjectWithTasks | null>(null)
+const activeTask = ref<Task | null>(null)
 
+// Computed
 const availableTasks = computed(() => {
   if (!selectedProject.value) return []
   return selectedProject.value.tasks.filter(
@@ -188,6 +252,24 @@ const availableTasks = computed(() => {
   )
 })
 
+const formattedTime = computed(() => {
+  const hours = Math.floor(elapsedSeconds.value / 3600)
+  const minutes = Math.floor((elapsedSeconds.value % 3600) / 60)
+  const seconds = elapsedSeconds.value % 60
+  
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+})
+
+const startTime = computed(() => {
+  if (!timerStartTime.value) return '00:00:00'
+  return timerStartTime.value.toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: true 
+  })
+})
+
+// Methods
 const getProjectTaskCount = (projectId: number) => {
   const project = props.projects.find((p) => p.id === projectId)
   if (!project) return 0
@@ -206,6 +288,15 @@ const getProjectIcon = (projectName: string) => {
   return iconMap[projectName] || 'heroicons:folder'
 }
 
+const getStatusColor = (status: string) => {
+  const colorMap: Record<string, string> = {
+    'pending': 'secondary',
+    'in_progress': 'primary',
+    'completed': 'success',
+  }
+  return colorMap[status] || 'secondary' as any
+}
+
 const selectProject = (project: ProjectWithTasks) => {
   selectedProject.value = project
   selectedTask.value = null
@@ -215,17 +306,79 @@ const selectTask = (task: Task) => {
   selectedTask.value = task
 }
 
-const handleClose = () => {
+const handleStart = () => {
+  if (!selectedTask.value || !selectedProject.value) return
+  
+  activeTask.value = selectedTask.value
+  activeProject.value = selectedProject.value
+  timerActive.value = true
+  isPaused.value = false
+  elapsedSeconds.value = 0
+  timerStartTime.value = new Date()
+  
+  startTimerInterval()
+  emit('start', selectedTask.value.id, selectedProject.value.id)
+}
+
+const startTimerInterval = () => {
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value)
+  }
+  
+  timerInterval.value = setInterval(() => {
+    if (!isPaused.value) {
+      elapsedSeconds.value++
+    }
+  }, 1000)
+}
+
+const pauseTimer = () => {
+  isPaused.value = true
+}
+
+const resumeTimer = () => {
+  isPaused.value = false
+}
+
+const stopTimer = () => {
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value)
+    timerInterval.value = null
+  }
+  
+  emit('stop', elapsedSeconds.value)
+  
+  // Reset state
+  timerActive.value = false
+  isPaused.value = false
+  elapsedSeconds.value = 0
+  timerStartTime.value = null
+  activeTask.value = null
+  activeProject.value = null
   selectedProject.value = null
   selectedTask.value = null
-  emit('close')
 }
 
-const handleStart = () => {
-  if (selectedTask.value) {
-    emit('start', selectedTask.value.id)
-    handleClose()
+const closeModal = () => {
+  if (!timerActive.value) {
+    isOpen.value = false
+    selectedProject.value = null
+    selectedTask.value = null
   }
 }
-</script>
 
+// Cleanup
+onUnmounted(() => {
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value)
+  }
+})
+
+// Watch for modal close
+watch(isOpen, (newValue) => {
+  if (!newValue && !timerActive.value) {
+    selectedProject.value = null
+    selectedTask.value = null
+  }
+})
+</script>

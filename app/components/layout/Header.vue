@@ -29,7 +29,6 @@
       <!-- Center: Active Task Timer Widget -->
       <TimerWidget
         variant="inline"
-        taskName="Redesign Homepage"
       />
 
       <!-- Right: Notifications + Profile -->

@@ -13,6 +13,16 @@
 
     <!-- Chart Container -->
     <div v-if="!noWrapper" class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+      <div class="w-full">
+        <apexchart
+          type="bar"
+          :options="mergedOptions"
+          :series="series"
+          :height="height"
+        />
+      </div>
+    </div>
+    <div v-else class="w-full">
       <apexchart
         type="bar"
         :options="mergedOptions"
@@ -20,13 +30,6 @@
         :height="height"
       />
     </div>
-    <apexchart
-      v-else
-      type="bar"
-      :options="mergedOptions"
-      :series="series"
-      :height="height"
-    />
 
     <!-- Legend Section -->
     <div v-if="showLegend && legendItems.length > 0" class="flex items-center justify-center gap-6 mt-6">

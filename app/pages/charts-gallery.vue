@@ -2,14 +2,14 @@
   <div class="min-h-screen bg-gray-50">
     <!-- Page Header -->
     <div class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 lg:px-6 py-6">
+      <div class=" px-4 lg:px-6 py-6">
         <h1 class="text-3xl font-bold text-gray-900">Chart Components Gallery</h1>
         <p class="text-gray-600 text-sm mt-2">Showcase of all available reusable chart components</p>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="max-w-7xl mx-auto px-4 lg:px-6 py-8">
+    <div class=" px-4 lg:px-6 py-8">
       <!-- Bar Chart -->
       <div class="mb-12">
         <h2 class="text-2xl font-bold text-gray-900 mb-6">Bar Chart Example</h2>
